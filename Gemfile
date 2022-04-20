@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 
 gem 'byebug'
-gem 'rubycop'
+gem 'rubocop'
 gem 'telegram-bot-ruby'
 
 # gem "rails"
