@@ -21,11 +21,16 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
         File.open('users.json', 'w') do |file|
           file.puts(JSON.generate(users))
         end
+
+        if chtID == nil && !(users.key?(message.from.id))
+          puts "\nadded new user."
+          print "#{users.each_key.map { |usrname| usrname }}\n"
+        end
       when '/stop'
         bot.api.send_message(chat_id: message.chat.id, text: "Bye, #{message.from.first_name}")
       end
 
-      if chtID
+      if chtID == message.chat.id
         msgHour = Time.at(message.date).hour
         msgMin = Time.at(message.date).min
 
@@ -41,7 +46,15 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
       if chtID.nil?
         puts 'choose username'
         print "#{users.each_key.map { |usrname| usrname }}\n"
-        chtID = users[gets.chomp]
+        user = gets.chomp
+        
+        while !(users.key?(user))
+          puts "invalid username. write again. . ."
+          print "#{users.each_key.map { |usrname| usrname }}\n"
+          user = gets.chomp
+        end
+        chtID = users[user]
+
         bot.api.send_message(chat_id: chtID, text: 'now I listening you')
         puts "\n\|‾‾   bot entered chat with @#{users.key(chtID)}   ‾‾\|"
       else
