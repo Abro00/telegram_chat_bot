@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
-
+source 'https://rubygems.org'
 
 gem 'byebug'
-gem 'rubocop'
+gem 'rubocop', require: false
 gem 'telegram-bot-ruby'
 
 # gem "rails"
