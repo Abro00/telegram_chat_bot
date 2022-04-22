@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'bundler/setup'
 Bundler.require(:default)
 
@@ -12,7 +14,7 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
   users = JSON.parse(File.read(USRLIST))
 
   def show_users(users)
-    if users.size == 0
+    if users.size.zero?
       print "there are no chats\npress enter to refresh list\n"
     else
       print "#{users.each_key.map { |usrname| usrname }}\n"
@@ -53,7 +55,7 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
   threads << reading
 
   sending = Thread.new do
-    while true
+    loop do
       if chtID.nil?
         puts 'choose username'
         show_users(users)
@@ -82,5 +84,5 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
   end
   threads << sending
 
-  threads.each { |thr| thr.join }
+  threads.each(&:join)
 end
