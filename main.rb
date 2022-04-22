@@ -1,15 +1,23 @@
 require 'bundler/setup'
-require 'telegram/bot'
-require 'json'
-require './constants'
 Bundler.require(:default)
+
+TOKEN = ENV.fetch('TOKEN_TG')
 
 Telegram::Bot::Client.run(TOKEN) do |bot|
   puts 'bot initialized :)'
+  usrList = 'users.json'
   threads = []
-  File.open('users.json', 'w') { |f| f.puts '{}' } unless File.exist?('users.json')
-  users = JSON.parse(File.read('users.json'))
   chtID = nil
+  File.open(usrList, 'w') { |f| f.puts '{}' } unless File.exist?(usrList)
+  users = JSON.parse(File.read(usrList))
+
+  def show_users(users)
+    if users.size == 0
+      print "there are no chats\npress enter to refresh list\n"
+    else
+      print "#{users.each_key.map { |usrname| usrname }}\n"
+    end
+  end
 
   reading = Thread.new do
     bot.listen do |message|
@@ -18,11 +26,11 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
         bot.api.send_message(chat_id: message.chat.id, text: "Hello, #{message.from.first_name}")
 
         users[message.from.username] = message.from.id
-        File.open('users.json', 'w') do |file|
+        File.open(usrList, 'w') do |file|
           file.puts(JSON.generate(users))
         end
 
-        if chtID == nil && !(users.key?(message.from.id))
+        if chtID.nil? && !users.key?(message.from.id)
           puts "\nadded new user."
           print "#{users.each_key.map { |usrname| usrname }}\n"
         end
@@ -31,8 +39,11 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
       end
 
       if chtID == message.chat.id
-        msgHour = Time.at(message.date).hour
-        msgMin = Time.at(message.date).min
+
+        msgTime = Time.at(message.date)
+
+        msgHour = msgTime.hour
+        msgMin = msgTime.min
 
         puts format("[%02d:%02d] #{message.from.first_name} (@#{message.from.username}) > #{message.text}", msgHour,
                     msgMin)
@@ -45,12 +56,12 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
     while true
       if chtID.nil?
         puts 'choose username'
-        print "#{users.each_key.map { |usrname| usrname }}\n"
+        show_users(users)
         user = gets.chomp
-        
-        while !(users.key?(user))
-          puts "invalid username. write again. . ."
-          print "#{users.each_key.map { |usrname| usrname }}\n"
+
+        until users.key?(user)
+          puts 'invalid username. write again. . .'
+          show_users(users)
           user = gets.chomp
         end
         chtID = users[user]
