@@ -5,11 +5,11 @@ TOKEN = ENV.fetch('TOKEN_TG')
 
 Telegram::Bot::Client.run(TOKEN) do |bot|
   puts 'bot initialized :)'
-  usrList = 'users.json'
+  USRLIST = 'users.json'
   threads = []
   chtID = nil
-  File.open(usrList, 'w') { |f| f.puts '{}' } unless File.exist?(usrList)
-  users = JSON.parse(File.read(usrList))
+  File.open(USRLIST, 'w') { |f| f.puts '{}' } unless File.exist?(USRLIST)
+  users = JSON.parse(File.read(USRLIST))
 
   def show_users(users)
     if users.size == 0
@@ -26,7 +26,7 @@ Telegram::Bot::Client.run(TOKEN) do |bot|
         bot.api.send_message(chat_id: message.chat.id, text: "Hello, #{message.from.first_name}")
 
         users[message.from.username] = message.from.id
-        File.open(usrList, 'w') do |file|
+        File.open(USRLIST, 'w') do |file|
           file.puts(JSON.generate(users))
         end
 
